@@ -146,6 +146,9 @@ public class ServletModule extends AbstractModule {
         "assets/datatables/js/dataTables.htmlNumberType.js",
         "/js/dataTables.htmlNumberType.js");
 
+    // New Web UI
+    registerAsset("ui/home.html", "/ui/home.html");
+
     bind(LeaderRedirect.class).in(Singleton.class);
     LifecycleModule.bindStartupAction(binder(), RedirectMonitor.class);
   }
