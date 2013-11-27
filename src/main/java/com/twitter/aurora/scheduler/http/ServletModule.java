@@ -63,19 +63,6 @@ public class ServletModule extends AbstractModule {
     requireBinding(Key.get(String.class, ClusterName.class));
     requireBinding(QuotaManager.class);
 
-    // Install jquery
-    registerAsset("assets/bower_components/jquery/jquery.min.js", "/js/jquery.js");
-
-    // Install bootstrap
-    final String BOOTSTRAP_PATH = "assets/bower_components/bootstrap.css/";
-    registerAsset(BOOTSTRAP_PATH +"css/bootstrap.min.css", "/css/bootstrap.min.css");
-    registerAsset(BOOTSTRAP_PATH +"css/bootstrap-responsive.min.css",
-        "/css/bootstrap-responsive.min.css");
-    registerAsset(BOOTSTRAP_PATH +"img/glyphicons-halflings-white.png",
-        "/img/glyphicons-halflings-white.png");
-    registerAsset(BOOTSTRAP_PATH + "img/glyphicons-halflings.png", "/img/glyphicons-halflings.png");
-    registerAsset(BOOTSTRAP_PATH + "js/bootstrap.min.js", "/js/bootstrap.min.js");
-
     // Bindings required for the leader redirector.
     requireBinding(LocalServiceRegistry.class);
     requireBinding(Key.get(new TypeLiteral<DynamicHostSet<ServiceInstance>>() { }));
@@ -112,10 +99,25 @@ public class ServletModule extends AbstractModule {
     });
 
     // Static assets.
+    // Register jquery
+    registerAsset("assets/bower_components/jquery/jquery.js", "/js/jquery.min.js");
+
+    // Register bootstrap
+    final String BOOTSTRAP_PATH = "assets/bower_components/bootstrap.css/";
+    registerAsset(BOOTSTRAP_PATH + "css/bootstrap.min.css", "/css/bootstrap.min.css");
+    registerAsset(BOOTSTRAP_PATH + "css/bootstrap-responsive.min.css",
+        "/css/bootstrap-responsive.min.css");
+    registerAsset(BOOTSTRAP_PATH + "img/glyphicons-halflings-white.png",
+        "/img/glyphicons-halflings-white.png");
+    registerAsset(BOOTSTRAP_PATH + "img/glyphicons-halflings.png", "/img/glyphicons-halflings.png");
+    registerAsset(BOOTSTRAP_PATH + "js/bootstrap.min.js", "/js/bootstrap.min.js");
+
     registerAsset("assets/util.js", "/js/util.js");
     registerAsset("assets/dictionary.js", "/js/dictionary.js");
     registerAsset("assets/images/viz.png", "/images/viz.png");
     registerAsset("assets/images/aurora.png", "/images/aurora.png");
+
+    // Register datatables
     registerAsset("assets/datatables/css/jquery.dataTables.css", "/css/jquery.dataTables.css");
     registerAsset("assets/datatables/images/back_disabled.png", "/images/back_disabled.png");
     registerAsset(
