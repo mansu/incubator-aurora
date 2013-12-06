@@ -147,7 +147,7 @@ public class MemStorage implements Storage {
   private void handleLogWriteFailure() {
     setLogStorageAvailability(false);
     if (schedulerLifecycle.isPresent()) {
-      schedulerLifecycle.get().asyncShutdown();
+      schedulerLifecycle.get().shutdown();
     }
   }
 

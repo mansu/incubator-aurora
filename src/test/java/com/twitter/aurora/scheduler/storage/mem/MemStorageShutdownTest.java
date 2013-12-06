@@ -18,6 +18,12 @@ import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 
+import static junit.framework.Assert.fail;
+
+/**
+ * A class that tests the behaviour of MemStorage on log write time out errors.
+ * These tests couldn't be part of MemStorageTest since we need the mocks provided by EasyMockTest.
+ */
 public class MemStorageShutdownTest extends EasyMockTest {
 
   private SchedulerLifecycle schedulerLifecycle;
@@ -74,6 +80,7 @@ public class MemStorageShutdownTest extends EasyMockTest {
     setExpectations(false);
     try {
       storage.write(writeWork);
+      fail("Storage failed to throw an exception on write");
     } catch (StreamAccessException e) {
       // Expected
     }
@@ -84,6 +91,7 @@ public class MemStorageShutdownTest extends EasyMockTest {
 
     try {
       storage.consistentRead(readWork);
+      fail("Storage failed to throw an exception on read");
     } catch (StreamAccessException e) {
       // Expected
     }
@@ -98,7 +106,7 @@ public class MemStorageShutdownTest extends EasyMockTest {
       expect(writeWork.apply(capture(storeProvider))).andThrow(timeoutException);
     }
 
-    schedulerLifecycle.asyncShutdown();
+    schedulerLifecycle.shutdown();
     expectLastCall();
 
     control.replay();
