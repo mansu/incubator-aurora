@@ -24,6 +24,8 @@ import com.twitter.aurora.scheduler.storage.entities.IScheduledTask;
 import com.twitter.aurora.scheduler.storage.mem.MemStorage;
 import com.twitter.common.util.testing.FakeClock;
 
+import static junit.framework.Assert.assertEquals;
+
 public class StorageBackfillTest {
 
   private Storage storage;

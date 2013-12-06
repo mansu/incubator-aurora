@@ -22,9 +22,10 @@ public class MemStorageShutdownTest extends EasyMockTest {
 
   private SchedulerLifecycle schedulerLifecycle;
   private MemStorage storage;
-  private MutateWork writeWork;
+  private MutateWork<Void, Exception> writeWork;
   private Quiet<Void> readWork;
 
+  @SuppressWarnings(value = "unchecked")
   @Before
   public void setUp() throws Exception {
     writeWork = createMock(MutateWork.class);

@@ -68,7 +68,7 @@ public class MesosLogTest extends EasyMockTest {
         .andThrow(new Log.WriterFailedException("Failed to write to log")).times(1);
 
     expect(dummyMutation.apply(EasyMock.<WriterInterface>anyObject()))
-        .andReturn(DUMMY_CONTENT).times(1);
+        .andReturn(String.valueOf(DUMMY_CONTENT)).times(1);
 
     control.replay();
 
