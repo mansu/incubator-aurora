@@ -177,6 +177,8 @@ public class MesosLog implements com.twitter.aurora.scheduler.log.Log {
 
     private WriterInterface writer;
 
+    private boolean isLogStreamAvailable;
+
     LogStream(LogInterface log, ReaderInterface reader, Amount<Long, Time> readTimeout,
         Provider<WriterInterface> writerFactory, Amount<Long, Time> writeTimeout,
         byte[] noopEntry) {
@@ -192,6 +194,8 @@ public class MesosLog implements com.twitter.aurora.scheduler.log.Log {
       this.writeTimeUnit = writeTimeout.getUnit().getTimeUnit();
 
       this.noopEntry = noopEntry;
+
+      this.isLogStreamAvailable = true;
     }
 
     @Override
@@ -311,6 +315,10 @@ public class MesosLog implements com.twitter.aurora.scheduler.log.Log {
 
     @VisibleForTesting
     synchronized <T> T mutate(OpStats stats, Mutation<T> mutation) {
+      if (!isLogStreamAvailable) {
+        throw new StreamAccessException("Log is unavailable due to previous errors");
+      }
+
       long start = System.nanoTime();
       if (writer == null) {
         writer = writerFactory.get();
@@ -319,6 +327,9 @@ public class MesosLog implements com.twitter.aurora.scheduler.log.Log {
         return mutation.apply(writer);
       } catch (TimeoutException e) {
         stats.timeouts.getAndIncrement();
+        // shut down all writes in case of a write time out as prep for fail over.
+        isLogStreamAvailable = false;
+        writer = null;
         throw new StreamAccessException("Timeout performing log " + stats.opName, e);
       } catch (Log.WriterFailedException e) {
         stats.failures.getAndIncrement();

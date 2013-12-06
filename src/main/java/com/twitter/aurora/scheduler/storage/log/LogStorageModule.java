@@ -25,8 +25,8 @@ import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 
 import com.twitter.aurora.scheduler.log.Log;
-import com.twitter.aurora.scheduler.storage.CallOrderEnforcingStorage;
 import com.twitter.aurora.scheduler.storage.DistributedSnapshotStore;
+import com.twitter.aurora.scheduler.storage.Storage;
 import com.twitter.aurora.scheduler.storage.log.LogManager.MaxEntrySize;
 import com.twitter.aurora.scheduler.storage.log.LogManager.SnapshotSetting;
 import com.twitter.aurora.scheduler.storage.log.LogStorage.ShutdownGracePeriod;
@@ -89,7 +89,8 @@ public class LogStorageModule extends AbstractModule {
     bind(Boolean.class).annotatedWith(SnapshotSetting.class).toInstance(DEFLATE_SNAPSHOTS.get());
 
     bind(LogStorage.class).in(Singleton.class);
-    install(CallOrderEnforcingStorage.wrappingModule(LogStorage.class));
+    bind(Storage.class).to(LogStorage.class);
+    bind(Storage.NonVolatileStorage.class).to(LogStorage.class);
     bind(DistributedSnapshotStore.class).to(LogStorage.class);
   }
 

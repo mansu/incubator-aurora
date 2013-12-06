@@ -46,6 +46,7 @@ import com.twitter.aurora.gen.ScheduledTask;
 import com.twitter.aurora.gen.TaskConfig;
 import com.twitter.aurora.gen.TaskEvent;
 import com.twitter.aurora.scheduler.Driver;
+import com.twitter.aurora.scheduler.SchedulerLifecycle;
 import com.twitter.aurora.scheduler.async.OfferQueue.OfferQueueImpl;
 import com.twitter.aurora.scheduler.async.OfferQueue.OfferReturnDelay;
 import com.twitter.aurora.scheduler.async.TaskGroups.SchedulingAction;
@@ -117,7 +118,7 @@ public class TaskSchedulerTest extends EasyMockTest {
 
   @Before
   public void setUp() {
-    storage = MemStorage.newEmptyStorage();
+    storage = MemStorage.newEmptyStorage(Optional.of(createMock(SchedulerLifecycle.class)));
     maintenance = createMock(MaintenanceController.class);
     stateManager = createMock(StateManager.class);
     assigner = createMock(TaskAssigner.class);

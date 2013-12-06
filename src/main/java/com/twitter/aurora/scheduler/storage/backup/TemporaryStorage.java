@@ -18,9 +18,11 @@ package com.twitter.aurora.scheduler.storage.backup;
 import java.util.Set;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 
 import com.twitter.aurora.gen.storage.Snapshot;
+import com.twitter.aurora.scheduler.SchedulerLifecycle;
 import com.twitter.aurora.scheduler.base.Query;
 import com.twitter.aurora.scheduler.base.Tasks;
 import com.twitter.aurora.scheduler.storage.SnapshotStore;
@@ -67,7 +69,7 @@ interface TemporaryStorage {
    */
   class TemporaryStorageFactory implements Function<Snapshot, TemporaryStorage> {
     @Override public TemporaryStorage apply(Snapshot snapshot) {
-      final Storage storage = MemStorage.newEmptyStorage();
+      final Storage storage = MemStorage.newEmptyStorage(Optional.<SchedulerLifecycle>absent());
       FakeClock clock = new FakeClock();
       clock.setNowMillis(snapshot.getTimestamp());
       final SnapshotStore<Snapshot> snapshotStore = new SnapshotStoreImpl(clock, storage);

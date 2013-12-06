@@ -22,6 +22,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -36,6 +37,7 @@ import com.twitter.aurora.gen.AssignedTask;
 import com.twitter.aurora.gen.Identity;
 import com.twitter.aurora.gen.ScheduledTask;
 import com.twitter.aurora.gen.TaskConfig;
+import com.twitter.aurora.scheduler.SchedulerLifecycle;
 import com.twitter.aurora.scheduler.base.Query;
 import com.twitter.aurora.scheduler.base.Tasks;
 import com.twitter.aurora.scheduler.storage.Storage;
@@ -68,7 +70,7 @@ public class MemStorageTest extends TearDownTestCase {
         new ExecutorServiceShutdown(executor, Amount.of(1L, Time.SECONDS)).execute();
       }
     });
-    storage = MemStorage.newEmptyStorage();
+    storage = MemStorage.newEmptyStorage(Optional.<SchedulerLifecycle>absent());
   }
 
   @Test

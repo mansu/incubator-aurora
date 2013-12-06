@@ -15,6 +15,9 @@
  */
 package com.twitter.aurora.scheduler.storage.mem;
 
+import com.google.common.base.Optional;
+
+import com.twitter.aurora.scheduler.SchedulerLifecycle;
 import com.twitter.aurora.scheduler.state.BaseSchedulerCoreImplTest;
 import com.twitter.aurora.scheduler.storage.Storage;
 
@@ -22,6 +25,6 @@ public class MemStorageSchedulerCoreImplTest extends BaseSchedulerCoreImplTest {
 
   @Override
   protected Storage createStorage() {
-    return MemStorage.newEmptyStorage();
+    return MemStorage.newEmptyStorage(Optional.<SchedulerLifecycle>absent());
   }
 }

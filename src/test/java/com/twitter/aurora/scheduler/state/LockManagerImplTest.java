@@ -28,6 +28,7 @@ import org.junit.rules.ExpectedException;
 import com.twitter.aurora.gen.Identity;
 import com.twitter.aurora.gen.Lock;
 import com.twitter.aurora.gen.LockKey;
+import com.twitter.aurora.scheduler.SchedulerLifecycle;
 import com.twitter.aurora.scheduler.base.JobKeys;
 import com.twitter.aurora.scheduler.state.LockManager.LockException;
 import com.twitter.aurora.scheduler.storage.entities.IJobKey;
@@ -65,8 +66,10 @@ public class LockManagerImplTest extends EasyMockTest {
 
     UUIDGenerator tokenGenerator = createMock(UUIDGenerator.class);
     EasyMock.expect(tokenGenerator.createNew()).andReturn(TOKEN).anyTimes();
-
-    lockManager = new LockManagerImpl(MemStorage.newEmptyStorage(), clock, tokenGenerator);
+    lockManager = new LockManagerImpl(
+        MemStorage.newEmptyStorage(Optional.of(createMock(SchedulerLifecycle.class))),
+        clock,
+        tokenGenerator);
     control.replay();
   }
 

@@ -41,6 +41,7 @@ import com.twitter.aurora.gen.ScheduledTask;
 import com.twitter.aurora.gen.TaskConfig;
 import com.twitter.aurora.gen.TaskEvent;
 import com.twitter.aurora.scheduler.Driver;
+import com.twitter.aurora.scheduler.SchedulerLifecycle;
 import com.twitter.aurora.scheduler.TaskIdGenerator;
 import com.twitter.aurora.scheduler.base.Query;
 import com.twitter.aurora.scheduler.base.Tasks;
@@ -55,6 +56,7 @@ import com.twitter.common.base.Closure;
 import com.twitter.common.testing.easymock.EasyMockTest;
 import com.twitter.common.util.testing.FakeClock;
 
+import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.junit.Assert.assertEquals;
@@ -87,7 +89,7 @@ public class StateManagerImplTest extends EasyMockTest {
     driver = createMock(Driver.class);
     eventSink = createMock(new Clazz<Closure<PubsubEvent>>() { });
     // TODO(William Farner): Use a mocked storage.
-    storage = MemStorage.newEmptyStorage();
+    storage = MemStorage.newEmptyStorage(Optional.of(createMock(SchedulerLifecycle.class)));
     stateManager = new StateManagerImpl(storage, clock, driver, taskIdGenerator, eventSink);
   }
 

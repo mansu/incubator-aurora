@@ -18,6 +18,8 @@ package com.twitter.aurora.scheduler;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -112,6 +114,7 @@ public class SchedulerLifecycle implements EventSubscriber {
   private final DriverReference driverRef;
   private final boolean shutdownAfterRunning;
   private final Clock clock;
+  private final ExecutorService asyncShutdownService;
 
   @Inject
   SchedulerLifecycle(
@@ -130,6 +133,8 @@ public class SchedulerLifecycle implements EventSubscriber {
     this.driverRef = checkNotNull(driverRef);
     this.shutdownAfterRunning = shutdownAfterRunning;
     this.clock = checkNotNull(clock);
+    asyncShutdownService = Executors.newSingleThreadExecutor(
+        new ThreadFactoryBuilder().setNameFormat("AsyncShutdown-%d").build());
   }
 
   /**
@@ -149,6 +154,21 @@ public class SchedulerLifecycle implements EventSubscriber {
   public void registered(DriverRegistered event) {
     registeredLatch.countDown();
     registeredFlag.set(1);
+  }
+
+  /**
+   * Initiate orderly shut down in a separate thread, since the invoking thread may hold locks on
+   * storage and may lead to deadlocks.
+   */
+  public void asyncShutdown() {
+    LOG.info("Launching a thread to commit suicide");
+    asyncShutdownService.submit(new Runnable() {
+      @Override public void run() {
+        LOG.info("Committing suicide");
+        lifecycle.shutdown();
+      }
+    });
+    asyncShutdownService.shutdown(); // don't accept more requests for shutdown.
   }
 
   /**

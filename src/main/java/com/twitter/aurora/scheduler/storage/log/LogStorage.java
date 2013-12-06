@@ -59,6 +59,8 @@ import com.twitter.aurora.gen.storage.Snapshot;
 import com.twitter.aurora.scheduler.base.Query;
 import com.twitter.aurora.scheduler.base.SchedulerException;
 import com.twitter.aurora.scheduler.base.Tasks;
+import com.twitter.aurora.scheduler.events.PubsubEvent.Interceptors.Event;
+import com.twitter.aurora.scheduler.events.PubsubEvent.Interceptors.SendNotification;
 import com.twitter.aurora.scheduler.log.Log.Stream.InvalidPositionException;
 import com.twitter.aurora.scheduler.log.Log.Stream.StreamAccessException;
 import com.twitter.aurora.scheduler.storage.AttributeStore;
@@ -293,6 +295,7 @@ public class LogStorage extends ForwardingStore
     // catchup in start after shutting down the incremental syncer.
   }
 
+  @SendNotification(after = Event.StorageStarted)
   @Override
   public synchronized void start(final MutateWork.NoResult.Quiet initializationLogic) {
     write(new MutateWork.NoResult.Quiet() {

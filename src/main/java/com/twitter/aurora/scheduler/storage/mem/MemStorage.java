@@ -20,7 +20,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.inject.Inject;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
 
+import com.twitter.aurora.scheduler.SchedulerLifecycle;
+import com.twitter.aurora.scheduler.log.Log.Stream.StreamAccessException;
 import com.twitter.aurora.scheduler.storage.AttributeStore;
 import com.twitter.aurora.scheduler.storage.JobStore;
 import com.twitter.aurora.scheduler.storage.LockStore;
@@ -51,6 +54,13 @@ public class MemStorage implements Storage {
   private final MutableStoreProvider storeProvider;
   private final ReadWriteLockManager lockManager = new ReadWriteLockManager();
 
+  // TODO(Suman Karumuri): Refactor MemStorage so schedulerLifecycle need not be optional anymore.
+  private final Optional<SchedulerLifecycle> schedulerLifecycle;
+
+  // Don't perform in-memory read/write operations when log is unavailable. If this flag is not set
+  // correctly, the data store may end up in an inconsistent state during failures.
+  private boolean logStorageAvailable = true;
+
   @Inject
   MemStorage(
       final SchedulerStore.Mutable schedulerStore,
@@ -58,8 +68,10 @@ public class MemStorage implements Storage {
       final TaskStore.Mutable taskStore,
       final LockStore.Mutable lockStore,
       final QuotaStore.Mutable quotaStore,
-      final AttributeStore.Mutable attributeStore) {
+      final AttributeStore.Mutable attributeStore,
+      final Optional<SchedulerLifecycle> schedulerLifecycle) {
 
+    this.schedulerLifecycle = checkNotNull(schedulerLifecycle);
     storeProvider = new MutableStoreProvider() {
       @Override public SchedulerStore.Mutable getSchedulerStore() {
         return schedulerStore;
@@ -95,14 +107,15 @@ public class MemStorage implements Storage {
    * Creates a new empty in-memory storage for use in testing.
    */
   @VisibleForTesting
-  public static MemStorage newEmptyStorage() {
+  public static MemStorage newEmptyStorage(final Optional<SchedulerLifecycle> schedulerLifecycle) {
     return new MemStorage(
         new MemSchedulerStore(),
         new MemJobStore(),
         new MemTaskStore(),
         new MemLockStore(),
         new MemQuotaStore(),
-        new MemAttributeStore());
+        new MemAttributeStore(),
+        schedulerLifecycle);
   }
 
   @Timed("mem_storage_consistent_read_operation")
@@ -116,9 +129,31 @@ public class MemStorage implements Storage {
       readLockWaitNanos.addAndGet(System.nanoTime() - lockStartNanos);
     }
     try {
+      checkStorageAvailable();
       return work.apply(storeProvider);
+    } catch (StreamAccessException e) {
+      handleLogWriteFailure();
+      throw e;
     } finally {
       lockManager.readUnlock();
+    }
+  }
+
+  /**
+   * In case of a write failure, shut down the scheduler so the master can fail over. Perform the
+   * shutdown asynchronously to prevent dead locks and data races among threads holding storage
+   * locks. Disable the mem storage before shutdown, so no reads and writes happen during shutdown.
+   */
+  private void handleLogWriteFailure() {
+    setLogStorageAvailability(false);
+    if (schedulerLifecycle.isPresent()) {
+      schedulerLifecycle.get().asyncShutdown();
+    }
+  }
+
+  private void checkStorageAvailable() {
+    if (!logStorageAvailable) {
+      throw new IllegalStorageStateException();
     }
   }
 
@@ -126,6 +161,8 @@ public class MemStorage implements Storage {
   @Override
   public <T, E extends Exception> T weaklyConsistentRead(Work<T, E> work)
       throws StorageException, E {
+
+    checkStorageAvailable();
 
     return work.apply(storeProvider);
   }
@@ -143,7 +180,11 @@ public class MemStorage implements Storage {
       writeLockWaitNanos.addAndGet(System.nanoTime() - lockStartNanos);
     }
     try {
+      checkStorageAvailable();
       return work.apply(storeProvider);
+    } catch (StreamAccessException e) {
+      handleLogWriteFailure();
+      throw e;
     } finally {
       lockManager.writeUnlock();
     }
@@ -152,5 +193,15 @@ public class MemStorage implements Storage {
   @Override
   public void snapshot() {
     // No-op.
+  }
+
+  private void setLogStorageAvailability(boolean isAvailable) {
+    logStorageAvailable = isAvailable;
+  }
+
+  class IllegalStorageStateException extends StorageException {
+    public IllegalStorageStateException() {
+      super("Storage is an inconsistent state.");
+    }
   }
 }

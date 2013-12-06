@@ -1,5 +1,6 @@
 package com.twitter.aurora.scheduler.storage;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -15,14 +16,13 @@ import com.twitter.aurora.gen.ScheduleStatus;
 import com.twitter.aurora.gen.ScheduledTask;
 import com.twitter.aurora.gen.TaskConfig;
 import com.twitter.aurora.gen.TaskConstraint;
+import com.twitter.aurora.scheduler.SchedulerLifecycle;
 import com.twitter.aurora.scheduler.base.Query;
 import com.twitter.aurora.scheduler.storage.Storage.MutableStoreProvider;
 import com.twitter.aurora.scheduler.storage.Storage.MutateWork;
 import com.twitter.aurora.scheduler.storage.entities.IScheduledTask;
 import com.twitter.aurora.scheduler.storage.mem.MemStorage;
 import com.twitter.common.util.testing.FakeClock;
-
-import static org.junit.Assert.assertEquals;
 
 public class StorageBackfillTest {
 
@@ -31,7 +31,7 @@ public class StorageBackfillTest {
 
   @Before
   public void setUp() {
-    storage = MemStorage.newEmptyStorage();
+    storage = MemStorage.newEmptyStorage(Optional.<SchedulerLifecycle>absent());
     clock = new FakeClock();
   }
 

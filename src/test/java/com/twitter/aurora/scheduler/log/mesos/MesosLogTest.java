@@ -26,18 +26,15 @@ public class MesosLogTest extends EasyMockTest {
   private static final Amount<Long, Time> WRITE_TIMEOUT = Amount.of(3L, Time.SECONDS);
   private static final byte[] DUMMY_CONTENT = "test data".getBytes();
 
-  private LogInterface logInterface;
-  private ReaderInterface reader;
-  private Provider<WriterInterface> writerFactory;
   private MesosLog.LogStream logStream;
   private MesosLog.LogStream.Mutation<String> dummyMutation;
   private MesosLog.LogStream.OpStats stats;
 
   @Before
   public void setUp() {
-    logInterface = createMock(LogInterface.class);
-    reader = createMock(ReaderInterface.class);
-    writerFactory = Providers.of(createMock(WriterInterface.class));
+    LogInterface logInterface = createMock(LogInterface.class);
+    ReaderInterface reader = createMock(ReaderInterface.class);
+    Provider<WriterInterface> writerFactory = Providers.of(createMock(WriterInterface.class));
 
     dummyMutation = createMock(new Clazz<MesosLog.LogStream.Mutation<String>>() { });
     stats = new MesosLog.LogStream.OpStats("test");
@@ -45,20 +42,42 @@ public class MesosLogTest extends EasyMockTest {
         writerFactory, WRITE_TIMEOUT, DUMMY_CONTENT);
   }
 
-  @Test(expected = StreamAccessException.class)
+  @Test
   public void testLogStreamTimeout() throws TimeoutException, Log.WriterFailedException {
-    testMutationFailure(new TimeoutException("Task timed out"));
-  }
-
-  @Test(expected = StreamAccessException.class)
-  public void testLogStreamWriteFailure() throws TimeoutException, Log.WriterFailedException {
-    testMutationFailure(new Log.WriterFailedException("Failed to write to log"));
-  }
-
-  private void testMutationFailure(Exception e) throws TimeoutException, Log.WriterFailedException {
-    expect(dummyMutation.apply(EasyMock.<WriterInterface>anyObject())).andThrow(e);
+    expect(dummyMutation.apply(EasyMock.<WriterInterface>anyObject()))
+        .andThrow(new TimeoutException("Task timed out"));
 
     control.replay();
-    logStream.mutate(stats, dummyMutation);
+
+    try {
+      logStream.mutate(stats, dummyMutation);
+    } catch (StreamAccessException e) {
+      // Expected;
+    }
+
+    try {
+      logStream.mutate(stats, dummyMutation);
+    } catch (StreamAccessException e) {
+      // Expected since log is disabled on a write time out
+    }
+  }
+
+  @Test
+  public void testLogStreamWriteFailure() throws TimeoutException, Log.WriterFailedException {
+    expect(dummyMutation.apply(EasyMock.<WriterInterface>anyObject()))
+        .andThrow(new Log.WriterFailedException("Failed to write to log")).times(1);
+
+    expect(dummyMutation.apply(EasyMock.<WriterInterface>anyObject()))
+        .andReturn(DUMMY_CONTENT).times(1);
+
+    control.replay();
+
+    try {
+      logStream.mutate(stats, dummyMutation);
+    } catch (StreamAccessException e) {
+      // Expected
+    }
+
+    logStream.mutate(stats, dummyMutation); // no error, since log is not disabled on write failure
   }
 }

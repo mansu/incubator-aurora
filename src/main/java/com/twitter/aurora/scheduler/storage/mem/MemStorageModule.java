@@ -17,9 +17,12 @@ package com.twitter.aurora.scheduler.storage.mem;
 
 import javax.inject.Singleton;
 
+import com.google.common.base.Optional;
 import com.google.inject.Key;
 import com.google.inject.PrivateModule;
+import com.google.inject.Provides;
 
+import com.twitter.aurora.scheduler.SchedulerLifecycle;
 import com.twitter.aurora.scheduler.storage.AttributeStore;
 import com.twitter.aurora.scheduler.storage.JobStore;
 import com.twitter.aurora.scheduler.storage.LockStore;
@@ -81,5 +84,10 @@ public final class MemStorageModule extends PrivateModule {
     bindStore(LockStore.Mutable.class, MemLockStore.class);
     bindStore(QuotaStore.Mutable.class, MemQuotaStore.class);
     bindStore(AttributeStore.Mutable.class, MemAttributeStore.class);
+  }
+
+  @Provides
+  Optional<SchedulerLifecycle> provideSchedulerLifeCycle(SchedulerLifecycle schedulerLifecycle) {
+    return Optional.of(schedulerLifecycle);
   }
 }

@@ -75,6 +75,10 @@ public interface Log {
       public StreamAccessException(String message, Throwable cause) {
         super(message, cause);
       }
+
+      public StreamAccessException(String message) {
+        super(message);
+      }
     }
 
     /**
