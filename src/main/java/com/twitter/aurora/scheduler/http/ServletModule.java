@@ -100,10 +100,10 @@ public class ServletModule extends AbstractModule {
 
     // Static assets.
     // Register jquery
-    registerAsset("assets/bower_components/jquery/jquery.js", "/js/jquery.min.js");
+    registerAsset("assets/js/libs/bower_components/jquery/jquery.js", "/js/jquery.min.js");
 
     // Register bootstrap
-    final String BOOTSTRAP_PATH = "assets/bower_components/bootstrap.css/";
+    final String BOOTSTRAP_PATH = "assets/js/libs/bower_components/bootstrap.css/";
     registerAsset(BOOTSTRAP_PATH + "css/bootstrap.min.css", "/css/bootstrap.min.css");
     registerAsset(BOOTSTRAP_PATH + "css/bootstrap-responsive.min.css",
         "/css/bootstrap-responsive.min.css");
@@ -117,6 +117,7 @@ public class ServletModule extends AbstractModule {
     registerAsset("assets/images/viz.png", "/images/viz.png");
     registerAsset("assets/images/aurora.png", "/images/aurora.png");
 
+    // TODO: Install datatables from bower.
     // Register datatables
     registerAsset("assets/datatables/css/jquery.dataTables.css", "/css/jquery.dataTables.css");
     registerAsset("assets/datatables/images/back_disabled.png", "/images/back_disabled.png");
