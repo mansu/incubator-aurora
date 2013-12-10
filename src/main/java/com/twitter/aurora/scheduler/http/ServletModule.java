@@ -40,9 +40,6 @@ import com.twitter.common.application.modules.LocalServiceRegistry;
 import com.twitter.common.base.ExceptionalCommand;
 import com.twitter.common.net.pool.DynamicHostSet;
 import com.twitter.common.net.pool.DynamicHostSet.MonitorException;
-import com.twitter.common.webassets.bootstrap.BootstrapModule;
-import com.twitter.common.webassets.bootstrap.BootstrapModule.BootstrapVersion;
-import com.twitter.common.webassets.jquery.JQueryModule;
 import com.twitter.thrift.ServiceInstance;
 
 import static com.sun.jersey.api.core.ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS;
@@ -65,9 +62,6 @@ public class ServletModule extends AbstractModule {
     requireBinding(CronJobManager.class);
     requireBinding(Key.get(String.class, ClusterName.class));
     requireBinding(QuotaManager.class);
-
-    install(new JQueryModule());
-    install(new BootstrapModule(BootstrapVersion.VERSION_2_3_2));
 
     // Bindings required for the leader redirector.
     requireBinding(LocalServiceRegistry.class);
@@ -105,10 +99,25 @@ public class ServletModule extends AbstractModule {
     });
 
     // Static assets.
+    // Register jquery
+    registerAsset("assets/bower_components/jquery/jquery.js", "/js/jquery.min.js");
+
+    // Register bootstrap
+    final String BOOTSTRAP_PATH = "assets/bower_components/bootstrap.css/";
+    registerAsset(BOOTSTRAP_PATH + "css/bootstrap.min.css", "/css/bootstrap.min.css");
+    registerAsset(BOOTSTRAP_PATH + "css/bootstrap-responsive.min.css",
+        "/css/bootstrap-responsive.min.css");
+    registerAsset(BOOTSTRAP_PATH + "img/glyphicons-halflings-white.png",
+        "/img/glyphicons-halflings-white.png");
+    registerAsset(BOOTSTRAP_PATH + "img/glyphicons-halflings.png", "/img/glyphicons-halflings.png");
+    registerAsset(BOOTSTRAP_PATH + "js/bootstrap.min.js", "/js/bootstrap.min.js");
+
     registerAsset("assets/util.js", "/js/util.js");
     registerAsset("assets/dictionary.js", "/js/dictionary.js");
     registerAsset("assets/images/viz.png", "/images/viz.png");
     registerAsset("assets/images/aurora.png", "/images/aurora.png");
+
+    // Register datatables
     registerAsset("assets/datatables/css/jquery.dataTables.css", "/css/jquery.dataTables.css");
     registerAsset("assets/datatables/images/back_disabled.png", "/images/back_disabled.png");
     registerAsset(
