@@ -68,12 +68,12 @@ Installing bower
 -----------------
 JS components in Aurora are managed by bower. Please install bower as follows:
 
-   npm install -g bower
+    npm install -g bower
 
 Bower depends on Node.js and npm. The easiest way to install node is via nvm:
 
-   curl https://raw.github.com/creationix/nvm/master/install.sh | sh
-   nvm install 0.10
+    curl https://raw.github.com/creationix/nvm/master/install.sh | sh
+    nvm install 0.10
 
 More info on installing and using bower can be found at: http://bower.io/
 
