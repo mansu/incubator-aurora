@@ -86,6 +86,10 @@ sourceSets {
 
 jar {
   from sourceSets.generated.output
+    manifest {
+        attributes("Created-By": "Gradle")
+        attributes("Main-Class": "com.twitter.aurora.scheduler.app.SchedulerMain")
+    }
 }
 
 dependencies {
