@@ -2,8 +2,6 @@
 
 set -o nounset
 
-#TODO: Check missing dist, else run installApp
-
 function usage() {
   echo "Usage: $0 (-h)"
   echo " -h        print out this help message"
@@ -19,6 +17,20 @@ function usage() {
 
 cd $(dirname $0)
 DIST="$(pwd)/../../dist"
+
+if [ ! -e ${DIST}/install/aurora-scheduler/bin/aurora-scheduler ]
+then
+  echo "Can't find ${DIST}/install/aurora-scheduler/bin/aurora-scheduler. Please run 'gradle build installApp' first."
+  exit;
+fi
+
+while getopts "dh" opt
+do
+  case ${opt} in
+    h) usage ;;
+    *) usage "Invalid option: -${opt}" ;;
+  esac
+done
 
 keyfile="${DIST}/resources/test/com/twitter/aurora/scheduler/app/AuroraTestKeyStore"
 http_port=8081
@@ -36,14 +48,6 @@ serverset_path="/twitter/service/mesos/$cluster_name/scheduler"
 
 log_dir="/tmp"
 native_log_zk_group_path="/local/service/mesos-native-log"
-
-while getopts "dh" opt
-do
-  case ${opt} in
-    h) usage ;;
-    *) usage "Invalid option: -${opt}" ;;
-  esac
-done
 
 # Call the script.
 export LOCAL_MESOS_LOGS=${log_dir}
