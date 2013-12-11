@@ -5,15 +5,13 @@ set -o nounset
 #TODO: Check missing dist, else run installApp
 
 cd $(dirname $0)
-HERE=$(pwd)
-DIST="${HERE}/../../dist"
+DIST="$(pwd)/../../dist"
 
 keyfile="${DIST}/resources/test/com/twitter/aurora/scheduler/app/AuroraTestKeyStore"
 http_port=8081
 master_zoo_url="local"
 thermos_executor_path="${DIST}/thermos_executor.pex"
 gc_executor_path="${DIST}/gc_executor.pex"
-native_log_quorum_size=1
 user_capabilities="ROOT=aurora"
 zk_in_proc="true"
 zk_endpoints="localhost:0"
@@ -22,10 +20,13 @@ thrift_port=55555
 
 # Specify the serverset address to use.
 cluster_name="local"
-cluster_ui_name=${cluster_ui_name:-$cluster_name}
 serverset_path="/twitter/service/mesos/$cluster_name/scheduler"
 
-# ????????
+log_dir="/tmp"
+native_log_zk_group_path="/local/service/mesos-native-log"
+debug_opts=""
+
+# TEST??????
 while getopts "dh" opt
 do
   case ${opt} in
@@ -38,15 +39,6 @@ if (( $OPTIND > 1 ))
 then
   shift $(($OPTIND - 1))
 fi
-
-####Local cluster options.
-# Provide defaults to make running a local scheduler easy.
-log_dir="/tmp"
-
-pidfile=/dev/null
-backup_dir="/tmp"
-native_log_zk_group_path="/local/service/mesos-native-log"
-debug_opts=""
 
 if [ "${debug:-}" = "true" ]
 then
@@ -75,13 +67,13 @@ ${DIST}/install/aurora-scheduler/bin/aurora-scheduler \
     -mesos_master_address=${master_zoo_url} \
     -log_dir=${log_dir} \
     -mesos_ssl_keyfile=${keyfile} \
-    -cluster_name=${cluster_ui_name} \
+    -cluster_name=${cluster_name} \
     -thrift_port=${thrift_port} \
     -user_capabilities=${user_capabilities} \
     -native_log_quorum_size=1\
     -native_log_file_path=/dev/null \
     -native_log_zk_group_path=${native_log_zk_group_path} \
-    -backup_dir=${backup_dir} \
+    -backup_dir=/tmp \
     -logtostderr \
     -vlog=INFO \
     -require_slave_checkpoint=${require_slave_checkpoint} \
