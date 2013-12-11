@@ -52,7 +52,7 @@ native_log_zk_group_path="/local/service/mesos-native-log"
 # Call the script.
 export LOCAL_MESOS_LOGS=${log_dir}
 export MESOS_RESOURCES="cpus:2;mem:2048;ports:[50000-60000];disk:4000"
-export AURORA_SCHEDULER_OPTS="-Djava.util.logging.manager=com.twitter.common.util.logging.UnresettableLogManager -Xms2g -Xmx2g" 
+export AURORA_SCHEDULER_OPTS="-Djava.util.logging.manager=com.twitter.common.util.logging.UnresettableLogManager -Xms2g -Xmx2g"
 
 ${DIST}/install/aurora-scheduler/bin/aurora-scheduler \
   -thermos_executor_path=${thermos_executor_path} \
