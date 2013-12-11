@@ -32,11 +32,11 @@ HERE=$(pwd)
 dc="local"
 LOCAL_CLUSTER_NAME="local"
 lib_dir=/usr/local/lib
-keyfile=""
+keyfile="${HERE}/../../dist/resources/test/com/twitter/aurora/scheduler/app/AuroraTestKeyStore"
 thrift_port=0
 http_port=8081
 master_zoo_url="local"
-thermos_executor_path="${HERE}/../../../dist/thermos_executor.pex"
+thermos_executor_path="${HERE}/../../dist/thermos_executor.pex"
 gc_executor_path="${HERE}/../../../dist/gc_executor.pex"
 native_log_quorum_size=1
 ## EMPTY??
@@ -133,12 +133,8 @@ fi
 export LOCAL_MESOS_LOGS=${log_dir}
 export MESOS_RESOURCES="cpus:2;mem:2048;ports:[50000-60000];disk:4000"
 
-export GLOG_v=1
-${java_launcher[@]} \
-  -Djava.library.path=$lib_dir \
-  -Djava.util.logging.manager=com.twitter.common.util.logging.UnresettableLogManager \
-  -cp ${jar} \
-  com.twitter.aurora.scheduler.app.SchedulerMain \
+export JVM_OPTS="-Djava.library.path=$lib_dir  -Djava.util.logging.manager=com.twitter.common.util.logging.UnresettableLogManager -Xms2g -Xmx2g"
+${HERE}/../../dist/install/aurora-scheduler/bin/aurora-scheduler \
     -thermos_executor_path=${thermos_executor_path} \
     -gc_executor_path=${gc_executor_path} \
     -http_port=${http_port} \
@@ -162,3 +158,4 @@ ${java_launcher[@]} \
     -require_slave_checkpoint=${require_slave_checkpoint} \
     -viz_job_url_prefix=https://viz.${dc}.twitter.com/dashboards/mesos-container-stats?source=sd. \
     ${additional_flags[@]} \
+    $@
