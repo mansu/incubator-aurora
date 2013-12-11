@@ -5,8 +5,7 @@ set -o nounset
 #TODO: Check missing dist, else run installApp
 
 function usage() {
-  echo "Usage: $0 (-h|-d)"
-  echo " -d        start a debugger if running locally"
+  echo "Usage: $0 (-h)"
   echo " -h        print out this help message"
   if (( $# > 0 ))
   then
@@ -38,35 +37,19 @@ serverset_path="/twitter/service/mesos/$cluster_name/scheduler"
 log_dir="/tmp"
 native_log_zk_group_path="/local/service/mesos-native-log"
 
-debug_opts=""
-
-# TEST??????
 while getopts "dh" opt
 do
   case ${opt} in
-    d) debug="true" ;;
     h) usage ;;
     *) usage "Invalid option: -${opt}" ;;
   esac
 done
 
-if (( $OPTIND > 1 ))
-then
-  shift $(($OPTIND - 1))
-fi
-
-if [ "${debug:-}" = "true" ]
-then
-  debug_opts="-Xdebug -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005"
-fi
-
-
-#TODO: WHY????????
+# Call the script.
 export LOCAL_MESOS_LOGS=${log_dir}
 export MESOS_RESOURCES="cpus:2;mem:2048;ports:[50000-60000];disk:4000"
+export AURORA_SCHEDULER_OPTS="-Djava.util.logging.manager=com.twitter.common.util.logging.UnresettableLogManager -Xms2g -Xmx2g" 
 
-#export JVM_OPTS="-Djava.util.logging.manager=com.twitter.common.util.logging.UnresettableLogManager -Xms2g -Xmx2g ${debug_opts}" 
-export AURORA_SCHEDULER_OPTS="-Djava.util.logging.manager=com.twitter.common.util.logging.UnresettableLogManager -Xms2g -Xmx2g ${debug_opts}" 
 ${DIST}/install/aurora-scheduler/bin/aurora-scheduler \
   -thermos_executor_path=${thermos_executor_path} \
   -gc_executor_path=${gc_executor_path} \
