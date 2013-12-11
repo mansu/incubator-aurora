@@ -46,9 +46,14 @@ do
   case ${opt} in
     d) debug="true" ;;
     h) usage ;;
-    *) usage "Invalid option: -${OPTARG}" ;;
+    *) usage "Invalid option: -${opt}" ;;
   esac
 done
+
+if (( $OPTIND > 1 ))
+then
+  shift $(($OPTIND - 1))
+fi
 
 if [ "${debug:-}" = "true" ]
 then
@@ -60,8 +65,8 @@ fi
 export LOCAL_MESOS_LOGS=${log_dir}
 export MESOS_RESOURCES="cpus:2;mem:2048;ports:[50000-60000];disk:4000"
 
-export JVM_OPTS="-Djava.util.logging.manager=com.twitter.common.util.logging.UnresettableLogManager -Xms2g -Xmx2g ${debug_opts}" 
-echo $JVM_OPTS
+#export JVM_OPTS="-Djava.util.logging.manager=com.twitter.common.util.logging.UnresettableLogManager -Xms2g -Xmx2g ${debug_opts}" 
+export AURORA_SCHEDULER_OPTS="-Djava.util.logging.manager=com.twitter.common.util.logging.UnresettableLogManager -Xms2g -Xmx2g ${debug_opts}" 
 ${DIST}/install/aurora-scheduler/bin/aurora-scheduler \
   -thermos_executor_path=${thermos_executor_path} \
   -gc_executor_path=${gc_executor_path} \
