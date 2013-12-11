@@ -44,6 +44,12 @@ Gradle can generate project files for your IDE. To generate an IntelliJ IDEA pro
 
 and import the generated `aurora.ipr` file.
 
+Running an isolated scheduler locally 
+-------------------------------------
+To run an isolated scheduler please run the following script:
+
+    ./examples/scheduler/scheduler-isolated.sh
+
 Adding or Upgrading a Dependency
 --------------------------------
 New dependencies can be added from Maven central by adding a `compile` dependency to `build.gradle`.
@@ -71,3 +77,15 @@ should not be modified directly:
 
 To upgrade Gradle unpack the new version somewhere, run `/path/to/new/gradle wrapper` in the
 repository root and commit the changed files.
+
+Managing  JS components used by Aurora UI
+===========================================
+JS components in Aurora are managed by bower. Please install bower as follows:
+
+   <npm install bower>
+
+To install npm, you need to install node.js as follows:
+
+  <NODE JS INSTALLATION> 
+
+A guide to use bower can be found at: <BOWER URL>
