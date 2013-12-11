@@ -35,26 +35,19 @@ do
     *) usage "Invalid option: -${OPTARG}" ;;
   esac
 done
-if (( $OPTIND > 1 ))
-then
-  shift $(($OPTIND - 1))
-fi
 
 if [ "${debug:-}" = "true" ]
 then
 export LOCAL_MESOS_DEBUG=true
-debug_opts=(
-${java_launcher[@]}
--Xdebug
--agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005
-)
+debug_opts="-Xdebug -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005"
 fi
 
+
+#TODO: WHY????????
 export LOCAL_MESOS_LOGS=${log_dir}
 export MESOS_RESOURCES="cpus:2;mem:2048;ports:[50000-60000];disk:4000"
 
 export JVM_OPTS="-Djava.util.logging.manager=com.twitter.common.util.logging.UnresettableLogManager -Xms2g -Xmx2g ${debug_opts}" 
-
 ${DIST}/install/aurora-scheduler/bin/aurora-scheduler \
     -thermos_executor_path=${thermos_executor_path} \
     -gc_executor_path=${gc_executor_path} \
