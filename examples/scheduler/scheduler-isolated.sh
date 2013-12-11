@@ -2,6 +2,8 @@
 
 set -o nounset
 
+#TODO: Check missing dist, else run installApp
+
 cd $(dirname $0)
 HERE=$(pwd)
 DIST="${HERE}/../../dist"
@@ -23,6 +25,7 @@ cluster_name="local"
 cluster_ui_name=${cluster_ui_name:-$cluster_name}
 serverset_path="/twitter/service/mesos/$cluster_name/scheduler"
 
+# ????????
 while getopts "dh" opt
 do
   case ${opt} in
@@ -38,22 +41,17 @@ fi
 
 ####Local cluster options.
 # Provide defaults to make running a local scheduler easy.
-log_dir=${log_dir:-/tmp}
-native_log_file_path=${native_log_file_path:-/dev/null}
+log_dir="/tmp"
 
 pidfile=/dev/null
 backup_dir="/tmp"
 native_log_zk_group_path="/local/service/mesos-native-log"
-jar="${HERE}/../../dist/libs/incubator-aurora.jar"
-# override for local
-if [ "${keyfile}" = "" ]; then
-keyfile="${HERE}/../../../tests/resources/com/twitter/aurora/internal/AuroraTestKeyStore"
-fi
+debug_opts=""
 
 if [ "${debug:-}" = "true" ]
 then
 export LOCAL_MESOS_DEBUG=true
-java_launcher=(
+debug_opts=(
 ${java_launcher[@]}
 -Xdebug
 -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005
@@ -63,7 +61,7 @@ fi
 export LOCAL_MESOS_LOGS=${log_dir}
 export MESOS_RESOURCES="cpus:2;mem:2048;ports:[50000-60000];disk:4000"
 
-export JVM_OPTS="-Djava.util.logging.manager=com.twitter.common.util.logging.UnresettableLogManager -Xms2g -Xmx2g"
+export JVM_OPTS="-Djava.util.logging.manager=com.twitter.common.util.logging.UnresettableLogManager -Xms2g -Xmx2g ${debug_opts}" 
 
 ${DIST}/install/aurora-scheduler/bin/aurora-scheduler \
     -thermos_executor_path=${thermos_executor_path} \
@@ -80,8 +78,8 @@ ${DIST}/install/aurora-scheduler/bin/aurora-scheduler \
     -cluster_name=${cluster_ui_name} \
     -thrift_port=${thrift_port} \
     -user_capabilities=${user_capabilities} \
-    -native_log_quorum_size=${native_log_quorum_size} \
-    -native_log_file_path=${native_log_file_path} \
+    -native_log_quorum_size=1\
+    -native_log_file_path=/dev/null \
     -native_log_zk_group_path=${native_log_zk_group_path} \
     -backup_dir=${backup_dir} \
     -logtostderr \
