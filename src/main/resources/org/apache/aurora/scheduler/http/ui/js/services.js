@@ -5,14 +5,12 @@ auroraUI.factory(
   function () {
     return {
       getJobSummary: function () {
-        var client = this.makeSchedulerClient();
-
-        var response;
-        console.log("querying server");
-        response = client.getJobSummary();
-        console.log(response);
-        return response.result.jobSummaryResult;
-      },
+        var response = this.makeSchedulerClient().getJobSummary();
+        return {
+          error : response.responseCode !== 1,
+          summaries : response.result !== null ? response.result.jobSummaryResult.summaries : []
+        }
+     },
 
       makeSchedulerClient: function () {
         var transport = new Thrift.Transport("/api/");
