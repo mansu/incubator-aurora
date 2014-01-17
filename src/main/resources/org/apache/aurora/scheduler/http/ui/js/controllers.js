@@ -19,11 +19,6 @@ angular.module('auroraUI.controllers', []).
         isGlobalSearchActivated: true,
         isPaginationEnabled: true,
         itemsByPage: 25,
-        maxSize: 8,
-        selectionMode: 'single'
+        maxSize: 8
       };
-
-      $scope.$on('selectionChange', function (event, args) {
-        $window.location.href = "/scheduler/" + args.item.role;
-      });
    });
